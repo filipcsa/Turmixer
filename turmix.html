@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Turmixer</title>
+        <style>
+            main {
+                background-color: salmon;
+                width: 1000px;
+                height: 600px;
+                margin: 0 auto;
+                display: flex;
+            }
+            .left {
+                text-align: center;
+                background-color: aqua;
+                width: 25%;
+                height: 100%;
+            }
+            ul {
+                margin: 0;
+                padding: 0;
+                background-color: blue;
+                list-style-type: none;
+            }
+
+            .playlists li {
+                padding-top: 0.2em;
+                padding-bottom: 0.2em;
+                font-size: 1.2em;
+                background-color: pink;
+            }
+            .playlists li:hover {
+                cursor: pointer;
+                background-color: red;
+            }
+
+            .right {
+                background-color: green;
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .player {
+                background-color: steelblue;
+                height: 20%;
+            }
+
+            .selectedPlaylist {
+                background-color: dimgrey;
+                flex-grow: 1;
+            }
+
+            @media (max-width: 900px) {
+                .left {
+                    display: none;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <main>
+            <nav class="left">
+                <h1>Playlists</h1>
+                <ul class="playlists">
+                    <li class="playlistItem">First</li>
+                    <li class="playlistItem">Second</li>
+                </ul>
+            </nav>
+            <div class="right">
+                <div class="player">
+                    Player here
+                </div>
+                <div class="selectedPlaylist">
+                    Selected playlist here
+                </div>
+            </div>
+        </main>
+    </body>
+
+    <script>
+
+        /** A class to represent a playlist
+        it consists of a title and a list of songs (their storage on HD) **/
+        class Playlist {
+            constructor(title) {
+                this.title = title;
+                this.songs = [];
+
+                // create list item, add event listener and add to DOM
+                this.li = document.createElement('li');
+                this.li.innerText = title;
+                this.li.addEventListener('click', this.selectThisPlaylist.bind(this), false);
+                let playlistsUL = document.querySelector('.playlists');
+                playlistsUL.appendChild(this.li);
+                console.log(playlistsUL);
+            }
+            
+            // when this playlist is clicked
+            selectThisPlaylist() {
+                console.log(`${this.title} clicked!`);
+            }
+
+            // method to add songs, can add single song or array of songs
+            addSong(path) {
+                if (Array.isArray(path)) {
+                    this.songs = this.songs.concat(path);
+                }
+                else { 
+                    this.songs.push(path);
+                }
+            }
+            
+            // function to save the current playlist to local storage
+            saveToLS() {
+                localStorage.setItem(this.title, JSON.stringify(this));
+            }
+        }
+
+        // a list of all the playlists, retreived from LS after loading the page, global var :/
+        var playlists = [];
+
+        // creating some testing deafult values
+
+
+        // some initial playlists for testing
+        const p1 = new Playlist('Rock');
+        const p2 = new Playlist('Second');
+        p1.addSong(['https://www.bensound.org/bensound-music/bensound-anewbeginning.mp3', 
+        'https://www.bensound.org/bensound-music/bensound-punky.mp3', 
+        'https://www.bensound.org/bensound-music/bensound-goinghigher.mp3', 
+        'https://www.bensound.org/bensound-music/bensound-beyondtheline.mp3', 
+        'https://www.bensound.org/bensound-music/bensound-rumble.mp3']);
+        p2.addSong(['song1', 'song2', 'song3', 'song4', 'song5']);
+        playlists.push(p1);
+        playlists.push(p2);
+
+        function displayAvailablePlaylists() {
+
+        }
+
+        function initPlaylists() {
+            JSON.parse(localStorage.getItem('playlists'));
+        }
+    </script>
+</html>
