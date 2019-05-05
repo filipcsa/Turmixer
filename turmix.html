@@ -3,35 +3,62 @@
     <head>
         <title>Turmixer</title>
         <style>
+            body {
+                margin: 0;
+                padding: 0;
+            }
             main {
-                background-color: salmon;
-                width: 1000px;
-                height: 600px;
+                font-family: Arial, Helvetica, sans-serif;
+                width: 100vw;
+                height: 40em;
                 margin: 0 auto;
                 display: flex;
             }
+
             .left {
                 text-align: center;
-                background-color: aqua;
-                width: 25%;
+                background-color: rgb(245, 245, 245);
+                width: 15em;
                 height: 100%;
+                display: block;
+                z-index: 0;
+                transition:margin 0.5s ease-out;
             }
-            ul {
+            .left.toggled {
+                margin-left: -15em;
+            }
+            @media (max-width: 900px) {
+                .left {
+                    margin-left: -15em;
+                }
+                .left.toggled {
+                    margin-left: 0em;
+                }
+            }
+            .left ul {
                 margin: 0;
                 padding: 0;
-                background-color: blue;
                 list-style-type: none;
             }
 
             .playlists li {
-                padding-top: 0.2em;
-                padding-bottom: 0.2em;
+                padding-top: 0.5em;
+                padding-bottom: 0.5em;
                 font-size: 1.2em;
-                background-color: pink;
+                background-color: rgb(243, 243, 243);
+                border-top-style: solid;
+                border-width: 1px;
+                border-color: rgb(109, 119, 119);
             }
+
+            .playlists li.selected {
+                font-weight: bold;
+                background-color: rgb(212, 212, 212);
+            }
+
             .playlists li:hover {
                 cursor: pointer;
-                background-color: red;
+                background-color: rgb(212, 212, 212);
             }
 
             .right {
@@ -41,9 +68,28 @@
                 flex-direction: column;
             }
 
+            .upper {
+                height: 5em;
+            }
+
             .player {
                 background-color: steelblue;
-                height: 20%;
+                display: flex;
+                align-items: center;
+            }
+
+
+            .playlistToggle {
+                background-image: url("icons/playlist_n.svg");
+                cursor: pointer;
+                background-repeat: 0 0;
+                margin-left: 1em;
+                width: 3.5em;
+                height: 3.5em;
+            }
+
+            .playlistToggle:hover {
+                background-image: url("icons/playlist_h.svg");
             }
 
             .selectedPlaylist {
@@ -51,64 +97,123 @@
                 flex-grow: 1;
             }
 
-            @media (max-width: 900px) {
-                .left {
-                    display: none;
-                }
+            h1 {
+                margin: 0;
+                padding-top: 0.6em;
+                overflow: clip;
+                font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 2em;
             }
+            footer {
+                font-size: 0.7em;
+                margin-top: 0.5em;
+                text-align: center;
+            }
+
         </style>
     </head>
 
     <body>
         <main>
             <nav class="left">
-                <h1>Playlists</h1>
+                <div class="upper">
+                        <h1>Playlists</h1>
+                </div>
                 <ul class="playlists">
-                    <li class="playlistItem">First</li>
-                    <li class="playlistItem">Second</li>
+
                 </ul>
             </nav>
             <div class="right">
-                <div class="player">
+                <div class="upper player">
+                    <audio>
+                    </audio>
+                    <div class="playlistToggle">
+                        Toggle
+                    </div>
                     Player here
                 </div>
-                <div class="selectedPlaylist">
+                <div class="selectedPlaylist" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
                     Selected playlist here
                 </div>
             </div>
         </main>
+        <footer>
+            Icons made by <a href="https://www.flaticon.com/authors/google" title="Google">Google</a> from <a href="https://www.flaticon.com/" 
+                title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
+        </footer>
     </body>
 
     <script>
 
+        // some global variables, all the playlists and the selected one, some elements i need later
+        // and the audio
+        var playlists = [];
+        var selectedPlaylist = null;
+        var selectedPlaylistDiv = document.querySelector('.selectedPlaylist');
+        var audio = document.querySelector('audio');
+
+        // logic for toggling the playlist menu od the left
+        var playlistToggleBtn = document.querySelector('.playlistToggle');
+        playlistToggleBtn.addEventListener('click', togglePlaylist, false);
+        function togglePlaylist() {
+            let leftMenu = document.querySelector('.left');
+            leftMenu.classList.toggle('toggled');
+
+        }
+
         /** A class to represent a playlist
-        it consists of a title and a list of songs (their storage on HD) **/
+        it consists of a title and a list of tracks (their storage on HD) **/
         class Playlist {
             constructor(title) {
                 this.title = title;
-                this.songs = [];
+                this.tracks = [];
+                this.selectedTrack = null;
 
                 // create list item, add event listener and add to DOM
                 this.li = document.createElement('li');
                 this.li.innerText = title;
-                this.li.addEventListener('click', this.selectThisPlaylist.bind(this), false);
+                this.li.addEventListener('click', this.onPlaylistClicked.bind(this), false);
                 let playlistsUL = document.querySelector('.playlists');
                 playlistsUL.appendChild(this.li);
                 console.log(playlistsUL);
             }
             
             // when this playlist is clicked
-            selectThisPlaylist() {
+            onPlaylistClicked() {
+                if (selectedPlaylist != null) {
+                    selectedPlaylist.li.classList.remove('selected');
+                }    
+                this.li.classList.add('selected');
+                selectedPlaylist = this;
                 console.log(`${this.title} clicked!`);
+                selectedPlaylistDiv.innerHTML = "";
+                this.tracks.forEach(this.displayTrack.bind(this));
             }
 
-            // method to add songs, can add single song or array of songs
+            // displays the track and adds event listener to it
+            displayTrack(track) {
+                let el = document.createElement('li');
+                el.innerText = track;
+                el.track = track;
+                el.addEventListener('click', this.onTrackClicked, false);
+                selectedPlaylistDiv.appendChild(el);
+                console.log(track);
+            }
+
+            onTrackClicked(event) {
+                console.log(event.target.track);
+                audio.src = event.target.track;
+                audio.play();
+                console.log("Track clicked");
+            }
+
+            // method to add tracks, can add track song or array of tracks
             addSong(path) {
                 if (Array.isArray(path)) {
-                    this.songs = this.songs.concat(path);
+                    this.tracks = this.tracks.concat(path);
                 }
                 else { 
-                    this.songs.push(path);
+                    this.tracks.push(path);
                 }
             }
             
@@ -118,10 +223,39 @@
             }
         }
 
-        // a list of all the playlists, retreived from LS after loading the page, global var :/
-        var playlists = [];
+        // Drag and drop based on MDN example
+        function dropHandler(ev) {
+            ev.preventDefault();
+            console.log("File dropped");
+            if (ev.dataTransfer.items) {
+                // Use DataTransferItemList interface to access the file(s)
+                for (var i = 0; i < ev.dataTransfer.items.length; i++) {
+                    // If dropped items aren't files, reject them
+                    if (ev.dataTransfer.items[i].kind === 'file') {
+                        var file = ev.dataTransfer.items[i].getAsFile();
+                        f = URL.createObjectURL(file);
+                        console.log(f);
+                        audio.src = f;
+                        audio.play();
+                        
+                        console.log('... file[' + i + '].name = ' + file.name);
+                    }
+                }
+            } else {
+                // Use DataTransfer interface to access the file(s)
+                for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+                console.log('... file[' + i + '].name = ' + ev.dataTransfer.files[i].name);
+                }
+            }
 
-        // creating some testing deafult values
+        }
+
+        function dragOverHandler(ev) {
+            console.log('File(s) in drop zone'); 
+
+            // Prevent default behavior (Prevent file from being opened)
+            ev.preventDefault();
+        }
 
 
         // some initial playlists for testing
