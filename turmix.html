@@ -1,116 +1,9 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.0/jsmediatags.min.js"></script>
         <title>Turmixer</title>
-        <style>
-            body {
-                margin: 0;
-                padding: 0;
-            }
-            main {
-                font-family: Arial, Helvetica, sans-serif;
-                width: 100vw;
-                height: 40em;
-                margin: 0 auto;
-                display: flex;
-            }
-
-            .left {
-                text-align: center;
-                background-color: rgb(245, 245, 245);
-                width: 15em;
-                height: 100%;
-                display: block;
-                z-index: 0;
-                transition:margin 0.5s ease-out;
-            }
-            .left.toggled {
-                margin-left: -15em;
-            }
-            @media (max-width: 900px) {
-                .left {
-                    margin-left: -15em;
-                }
-                .left.toggled {
-                    margin-left: 0em;
-                }
-            }
-            .left ul {
-                margin: 0;
-                padding: 0;
-                list-style-type: none;
-            }
-
-            .playlists li {
-                padding-top: 0.5em;
-                padding-bottom: 0.5em;
-                font-size: 1.2em;
-                background-color: rgb(243, 243, 243);
-                border-top-style: solid;
-                border-width: 1px;
-                border-color: rgb(109, 119, 119);
-            }
-
-            .playlists li.selected {
-                font-weight: bold;
-                background-color: rgb(212, 212, 212);
-            }
-
-            .playlists li:hover {
-                cursor: pointer;
-                background-color: rgb(212, 212, 212);
-            }
-
-            .right {
-                background-color: green;
-                flex-grow: 1;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .upper {
-                height: 5em;
-            }
-
-            .player {
-                background-color: steelblue;
-                display: flex;
-                align-items: center;
-            }
-
-
-            .playlistToggle {
-                background-image: url("icons/playlist_n.svg");
-                cursor: pointer;
-                background-repeat: 0 0;
-                margin-left: 1em;
-                width: 3.5em;
-                height: 3.5em;
-            }
-
-            .playlistToggle:hover {
-                background-image: url("icons/playlist_h.svg");
-            }
-
-            .selectedPlaylist {
-                background-color: dimgrey;
-                flex-grow: 1;
-            }
-
-            h1 {
-                margin: 0;
-                padding-top: 0.6em;
-                overflow: clip;
-                font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                font-size: 2em;
-            }
-            footer {
-                font-size: 0.7em;
-                margin-top: 0.5em;
-                text-align: center;
-            }
-
-        </style>
     </head>
 
     <body>
@@ -151,6 +44,7 @@
         var selectedPlaylist = null;
         var selectedPlaylistDiv = document.querySelector('.selectedPlaylist');
         var audio = document.querySelector('audio');
+        var jsmediatags = window.jsmediatags;
 
         // logic for toggling the playlist menu od the left
         var playlistToggleBtn = document.querySelector('.playlistToggle');
@@ -193,11 +87,20 @@
             // displays the track and adds event listener to it
             displayTrack(track) {
                 let el = document.createElement('li');
+                
+                let url =  track;//"https://cors-anywhere.herokuapp.com/" + track;
+                jsmediatags.read(url, {
+                    onSuccess: function(tag) {
+                        console.log(tag);
+                        el.innerText = tag.tags.title;
+                    }
+                });
+                
                 el.innerText = track;
+
                 el.track = track;
                 el.addEventListener('click', this.onTrackClicked, false);
                 selectedPlaylistDiv.appendChild(el);
-                console.log(track);
             }
 
             onTrackClicked(event) {
@@ -249,7 +152,6 @@
             }
 
         }
-
         function dragOverHandler(ev) {
             console.log('File(s) in drop zone'); 
 
@@ -260,15 +162,16 @@
 
         // some initial playlists for testing
         const p1 = new Playlist('Rock');
-        const p2 = new Playlist('Electro');
-        p1.addSong(['https://www.bensound.org/bensound-music/bensound-anewbeginning.mp3', 
+        const p3 = new Playlist('Local')
+        p1.addSong(['https://playx.fun/MvWBZB:Vtx1rB',
+        'https://www.bensound.org/bensound-music/bensound-anewbeginning.mp3', 
         'https://www.bensound.org/bensound-music/bensound-punky.mp3', 
         'https://www.bensound.org/bensound-music/bensound-goinghigher.mp3', 
         'https://www.bensound.org/bensound-music/bensound-beyondtheline.mp3', 
         'https://www.bensound.org/bensound-music/bensound-rumble.mp3']);
-        p2.addSong(['song1', 'song2', 'song3', 'song4', 'song5']);
+        p3.addSong(['local/minor.mp3', 'local/moskau.mp3']);
         playlists.push(p1);
-        playlists.push(p2);
+        playlists.push(p3);
 
         function displayAvailablePlaylists() {
 
