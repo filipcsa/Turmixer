@@ -123,5 +123,13 @@ function getPlaylistSongAndDisplayInCustomPlaylist() {
     }
 }
 
+function removePlaylist(title) {
+    var store = getObjectStore(DB_STORE_NAME, 'readwrite');
+    var req = store.delete(title);
+    req.onsuccess = function(evt) {
+        console.log("Playlist removed successfuly");
+    }
+}
+
 openDb();
 

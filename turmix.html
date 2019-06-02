@@ -18,9 +18,8 @@
 
                 </ul>
                 <div class="managePlaylists">
-                        <div class="addPlaylist">
-
-                            </div>
+                        <div class="addPlaylist"></div>
+                        <div class="removePlaylist"></div>
                 </div>
             </nav>
             <div class="right">
@@ -28,18 +27,21 @@
                     <audio>
                     </audio>
                     <div class="playlistToggle">
-                        Toggle
                     </div>
+                    <div class="spacing"></div>
 
                     <div id="playToggle" class="pause">
                     </div>
 
-                    <h4 class="currentSong"></h4>
+                    <div id="soundToggle" class="sound">
+                    </div>
+
+                    <h4 class="currentSong">Current song</h4>
 
                     <div class="visual">
                         <canvas class="visualizer"></canvas>
-                        <div class="progress">
-
+                        <div class="progressbckgrnd">
+                            <div class="progress"></div>
                         </div>
                     </div>
                 </div>
@@ -49,13 +51,21 @@
                 </div>              
             </div>
         </main>
-        <div class="modalAdd">
+        <div class="modal" id="modalAdd">
             <div class="modalAddContent">
                 <h5>Enter the title of the new playlist</h5>
               
                     <input type="text" id="pltitle" value="Custom"> <br>
                     <button id="addPlBtn">Add</button>
               
+            </div>
+        </div>
+        <div class="modal" id="modalRemove">
+            <div class="modalRemoveContent">
+                <h5>Remove selected playlist?</h5>
+                <div class="buttons">
+                    <button id="yes" style="margin-right: 2em">Yes</button> <button id="no">No</button>
+                </div>
             </div>
         </div>
         <footer>
@@ -83,7 +93,7 @@
 
             // Adding playlist - opening modal
             var addPlaylistBtn = document.querySelector(".addPlaylist");
-            var addPlaylistModal = document.querySelector(".modalAdd");
+            var addPlaylistModal = document.querySelector("#modalAdd");
             addPlaylistBtn.addEventListener('click', onAddPlaylistClicked);
             function onAddPlaylistClicked() {
                 console.log("Add playlist clicked");
@@ -96,16 +106,61 @@
             function addPlaylistFinal() {
                 console.log("Add button clicked");
                 let txt = txtInput.value;
+                if (txt.length == 0) return;
+                txtInput.value = "";
                 const pl = new CustomPlaylist(txt);
                 playlists.push(pl);
                 addPlaylistModal.classList.remove("visible");
             }
 
-            // The audio PLAYER logic
+            // Removing playlist - opening modal
+            var rmvPlaylistBtn = document.querySelector(".removePlaylist");
+            var rmvPlaylistModal = document.querySelector("#modalRemove");
+            rmvPlaylistBtn.addEventListener('click', onRemovePlaylistClicked);
+            function onRemovePlaylistClicked() {
+                // no selected or selected is immutable
+                if (selectedPlaylist == null || selectedPlaylist.title == "Immutable") return;
+                console.log("Remove playlist clicked");
+                rmvPlaylistModal.classList.add("visible");
+            }
+            var yesBtn = document.querySelector("#yes");
+            var noBtn = document.querySelector("#no");
+            yesBtn.addEventListener('click', onYesBtn);
+            noBtn.addEventListener('click', onNoBtn);
+            function onYesBtn() {
+                var title = selectedPlaylist.title;
+                removePlaylist(title);
+                var el = document.getElementById(title);
+                el.style.display = 'none';
+                selectedPlaylist = p1;
+                p1.displayPlaylist();
+                rmvPlaylistModal.classList.remove("visible");
+            }
+            function onNoBtn() {
+                rmvPlaylistModal.classList.remove("visible");
+            }
+
+            var soundToggle = document.querySelector("#soundToggle");
+            soundToggle.addEventListener('click', toggleSound);
+            function toggleSound() {
+                if (!audio.muted){
+                    soundToggle.classList = "";
+                    soundToggle.classList.add("mute");
+                    audio.muted = true;
+                }
+                else {
+                    soundToggle.classList = "";
+                    soundToggle.classList.add("sound");
+                    audio.muted = false;
+                }
+            }
+
+            // Toggle play
             var playToggle = document.querySelector('#playToggle');
             playToggle.addEventListener('click', togglePlay);
 
             function togglePlay() {
+                if (audio.src == '') return;
                 console.log("Play btn clicked!")
                 if (audio.paused) {
                     audio.play();
@@ -146,11 +201,12 @@
             }
                 
             
-            // The visualizer
+            // The visualizer inspired by MDN 
+            var src = null;
             audio.addEventListener("playing", function(_event) {
-                if (selectedPlaylist.type == "immutable") return;
+                if (selectedPlaylist.type == "immutable" || src != null) return;
                 var context = new AudioContext();
-                var src = context.createMediaElementSource(audio);
+                src = context.createMediaElementSource(audio);
                 var analyser = context.createAnalyser();
                 var canvas = document.querySelector(".visualizer");
 
@@ -171,25 +227,27 @@
 
                 function renderFrame() {
                     requestAnimationFrame(renderFrame);
-
                     x = 0;
-
                     analyser.getByteFrequencyData(dataArray);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                    ctx.fillStyle = "rgba(255, 255, 255, 1)";
-                    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+                    // normalization ruins the CPU
+                    // tho it would be the best way to visualize audio :/
+                    //let max_x = Math.max.apply(Math, dataArray);
+                    //let min_x = Math.min.apply(Math, dataArray);
 
                     for (var i = 0; i < bufferLength; i++) {
-                        barHeight = dataArray[i];
+                        var x_1 = dataArray[i];
+                        var barHeight = (HEIGHT)*((x_1)/(420));
                         
-                        var r = barHeight + (25 * (i/bufferLength));
+                        var r = 10 * (25 * (i/bufferLength));
                         var g = 250 * (i/bufferLength);
-                        var b = 50;
+                        var b = barHeight + 50;
 
                         ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
-                        ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+                        ctx.fillRect(x, (HEIGHT - barHeight)/2, barWidth, barHeight);
 
-                        x += barWidth + 1;
+                        x += barWidth + 1 ;
                     }
                 }
                 audio.play();
@@ -235,28 +293,18 @@
     
             // some initial playlists for testing
             const p1 = new Playlist('Immutable');
-            const song1 = new Song('https://playx.fun/MvWBZB:Vtx1rB', 'Nightcall',
-            'Kavinski', 'https://images-na.ssl-images-amazon.com/images/I/61SGDGFdkfL._SX355_.jpg')
-            const song2 = new Song('http://a.keepvid.ws/d/UbQgXeY_zi4/Caravan%20Palace%20-%20Lone%20Digger.mp3',
-            'Lone Digger', 'Caravan palace', 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Caravan_Palace_-_Robot_Face_album_cover.png/220px-Caravan_Palace_-_Robot_Face_album_cover.png');
-            const song3 = new Song('https://aoo.eooc.cc/bb62be9d2237ae25821b3fb10b81ce30/KDxJlW6cxRk',
-            'Ocean Drive', 'Duke Dumont', '');
-            const song4 = new Song('http://fredfred.net/skriker/download/music/Django_Reinhardt-Minor_swing.mp3',
-            'Minor swing', 'Django Reinhardt', '');
-            const song5 = new Song('https://eac.eooc.cc/68caddd0dae88a308d0c44006a402db6/uMK0prafzw0', 'Ugly boy',
-            'Die Antwoord', '');
-            const song6 = new Song('https://cco.eooc.cc/df3e6a33b88a89b478a4a77c05a8e78d/fGx6K90TmCI', "X Gon' Give It To Ya",
-            'DMX', '');
-            const song7 = new Song('https://aco.eooc.cc/832de5612785b6bbf6ac532e77e59d3e/uJ_1HMAGb4k', 'Riptide',
-            'Vance Joy', '');
+            const song1 = new Song('http://fredfred.net/skriker/download/music/Django_Reinhardt-Minor_swing.mp3',
+            'Minor swing', 'Django Reinhardt', 'https://images-na.ssl-images-amazon.com/images/I/91yLj1FzQCL._SY355_.jpg');
+            const song2 = new Song('https://a.tumblr.com/tumblr_lru8tfFmwN1qzat1go1.mp3', 'The Good, The Bad and The Ugly',
+            'Ennio Morricone', 'https://images-na.ssl-images-amazon.com/images/I/612km2U7SSL._SY355_.jpg');
+            const song3 = new Song('https://a.tumblr.com/tumblr_lq3a0zKoSn1qjcjsyo1.mp3', 'Should I stay or should I go', 
+            'The Clash', 'https://res.cloudinary.com/teepublic/image/private/s--z9FceAtJ--/t_Preview/b_rgb:191919,c_limit,f_jpg,h_630,q_90,w_630/v1472673652/production/designs/600701_2.jpg');
+
             
             p1.addSong(song1);
             p1.addSong(song2);
             p1.addSong(song3);
-            p1.addSong(song4);
-            p1.addSong(song5);
-            p1.addSong(song6);
-            p1.addSong(song7);
+
             playlists.push(p1);
 
         </script>

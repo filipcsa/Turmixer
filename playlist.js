@@ -42,6 +42,7 @@ class Playlist {
 
         // create list item, add event listener and add to DOM
         this.li = document.createElement('li');
+        this.li.id = this.title;
         this.li.innerText = title;
         this.li.addEventListener('click', this.onPlaylistClicked.bind(this), false);
         let playlistsUL = document.querySelector('.playlists');

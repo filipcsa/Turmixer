@@ -71,14 +71,25 @@ main {
     background-size: cover;
     width: 3em;
     height: 3em;
+    margin-right: 1em;
 }
 
 .left .addPlaylist:hover {
     background-image: url("icons/add_h.svg");
 }
 
+.left .removePlaylist {
+    background-image: url("icons/remove_n.svg");
+    background-size: cover;
+    width: 3em;
+    height: 3em;
+}
+
+.left .removePlaylist:hover {
+    background-image: url("icons/remove_h.svg");
+}
+
 .right {
-    background-color: green;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -89,7 +100,7 @@ main {
 }
 
 .player {
-    background-color: steelblue;
+    background-image: linear-gradient(#D3D3D3, #E0E0E0	, 	#D3D3D3);
     display: flex;
     align-items: center;
 }
@@ -97,10 +108,11 @@ main {
 
 .playlistToggle {
     background-image: url("icons/playlist_n.svg");
+    background-size: cover;
     cursor: pointer;
     background-repeat: 0 0;
-    margin-left: 1em;
-    width: 3em;
+    margin-left: 2em;
+    min-width: 3em;
     height: 3em;
 }
 
@@ -108,8 +120,33 @@ main {
     background-image: url("icons/playlist_h.svg");
 }
 
+#soundToggle {
+    width: 3em;
+    height: 3em;
+    margin-right: 2em;
+}
+
+#soundToggle.sound {
+    background-image: url("icons/volume_n.svg");
+    background-size: cover;
+}
+
+#soundToggle.sound:hover {
+    background-image: url("icons/volume_h.svg");
+}
+
+#soundToggle.mute {
+    background-image: url("icons/mute_n.svg");
+    background-size: cover;
+}
+
+#soundToggle.mute:hover {
+    background-image: url("icons/mute_h.svg");
+}
+
 #playToggle {
     min-width: 4em;
+    margin-right: 2em;
 }
 
 #playToggle.pause {
@@ -117,7 +154,6 @@ main {
     background-size: cover;
     cursor: pointer;
     background-repeat: 0 0;
-    margin-left: 2em;
     width: 4em;
     height: 4em;
 }
@@ -132,7 +168,6 @@ main {
     background-size: cover;
     cursor: pointer;
     background-repeat: 0 0;
-    margin-left: 2em;
     width: 4em;
     height: 4em;
 }
@@ -140,6 +175,11 @@ main {
 #playToggle.play:hover{
     background-image: url("icons/pause_h.png");
     background-size: cover;
+}
+
+.spacing {
+    width: 10em;
+    flex-shrink: 2;
 }
 
 .currentSong{
@@ -153,10 +193,10 @@ main {
 .visual {
     display: flex;
     flex-direction: column;
-    background-color: pink;
     flex-grow: 1;
-    margin-left: 1em;
-    margin-right: 2em;
+    margin-left: 2em;
+    margin-right: 4em;
+    max-width: 500px;
 }
 
 .visualizer {
@@ -168,14 +208,14 @@ main {
 .progress {
     width: 1px;
     height: 3px;
-    background: red;
+    background: black;
     transition: width .1s linear;
   }
 
 .selectedPlaylist {
     display: flex;
     flex-wrap: wrap;
-    background-color: dimgrey;
+    background-color: 	#B0B0B0;
     padding: 10px;
     flex-grow: 1;
     overflow-y: scroll;
@@ -226,7 +266,7 @@ footer {
 }
 
 
-.modalAdd {
+.modal {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -242,7 +282,7 @@ footer {
     z-index: 99;
 }
 
-.modalAdd.visible {
+.modal.visible {
     visibility: visible;
 }
 
@@ -257,4 +297,27 @@ footer {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.modalRemoveContent {
+    margin: auto;
+    padding: 16px;
+    width: 400px;
+    max-width: 800px;
+    min-height: 300px;
+    border-radius: 10px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+}
+
+.progressbckgrnd {
+    width: 100%;
+    background: gray;
 }
