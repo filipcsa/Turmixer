@@ -2,7 +2,9 @@
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="style.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.0/jsmediatags.min.js"></script>
+        <script src="./dist/musicmetadata.js"></script>
+        <script src="playlist.js"></script>
+        <script src="idb.js"></script>
         <title>Turmixer</title>
     </head>
 
@@ -23,162 +25,238 @@
                     <div class="playlistToggle">
                         Toggle
                     </div>
+
+                    <div id="playToggle" class="pause">
+                    </div>
+
+                    <div class="visual">
+                        <canvas class="visualizer"></canvas>
+                        <div class="progress">Progress</div>
+                    </div>
+
                     Player here
                 </div>
+        
                 <div class="selectedPlaylist" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
-                    Selected playlist here
+                    <div class="song">
+                        <img class="album" src='icons/album_placeholder.jpg'>
+                        <h6>Title long long long long long long long long </h6>
+                        <h6>Artist</h6>
+                    </div>
+
+                    <div class="song">
+                        Song
+                    </div>
+
+                    <div class="song">
+                        Song
+                    </div>
+
+                    <div class="song">
+                        Song
+                    </div>
+
+                    <div class="song">
+                        Song
+                    </div>
                 </div>
+              
             </div>
         </main>
         <footer>
             Icons made by <a href="https://www.flaticon.com/authors/google" title="Google">Google</a> from <a href="https://www.flaticon.com/" 
-                title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
+                title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
         </footer>
-    </body>
 
-    <script>
+        <script>
 
-        // some global variables, all the playlists and the selected one, some elements i need later
-        // and the audio
-        var playlists = [];
-        var selectedPlaylist = null;
-        var selectedPlaylistDiv = document.querySelector('.selectedPlaylist');
-        var audio = document.querySelector('audio');
-        var jsmediatags = window.jsmediatags;
-
-        // logic for toggling the playlist menu od the left
-        var playlistToggleBtn = document.querySelector('.playlistToggle');
-        playlistToggleBtn.addEventListener('click', togglePlaylist, false);
-        function togglePlaylist() {
-            let leftMenu = document.querySelector('.left');
-            leftMenu.classList.toggle('toggled');
-
-        }
-
-        /** A class to represent a playlist
-        it consists of a title and a list of tracks (their storage on HD) **/
-        class Playlist {
-            constructor(title) {
-                this.title = title;
-                this.tracks = [];
-                this.selectedTrack = null;
-
-                // create list item, add event listener and add to DOM
-                this.li = document.createElement('li');
-                this.li.innerText = title;
-                this.li.addEventListener('click', this.onPlaylistClicked.bind(this), false);
-                let playlistsUL = document.querySelector('.playlists');
-                playlistsUL.appendChild(this.li);
-                console.log(playlistsUL);
-            }
-            
-            // when this playlist is clicked
-            onPlaylistClicked() {
-                if (selectedPlaylist != null) {
-                    selectedPlaylist.li.classList.remove('selected');
-                }    
-                this.li.classList.add('selected');
-                selectedPlaylist = this;
-                console.log(`${this.title} clicked!`);
-                selectedPlaylistDiv.innerHTML = "";
-                this.tracks.forEach(this.displayTrack.bind(this));
+            // some global variables, all the playlists and the selected one, some elements i need later
+            // and the audio
+            var playlists = [];
+            var selectedPlaylist = null;
+            var selectedPlaylistDiv = document.querySelector('.selectedPlaylist');
+            var audio = document.querySelector('audio');
+    
+            // logic for toggling the playlist menu od the left
+            var playlistToggleBtn = document.querySelector('.playlistToggle');
+            playlistToggleBtn.addEventListener('click', togglePlaylist, false);
+            function togglePlaylist() {
+                let leftMenu = document.querySelector('.left');
+                leftMenu.classList.toggle('toggled');
+    
             }
 
-            // displays the track and adds event listener to it
-            displayTrack(track) {
-                let el = document.createElement('li');
-                
-                let url =  track;//"https://cors-anywhere.herokuapp.com/" + track;
-                jsmediatags.read(url, {
-                    onSuccess: function(tag) {
-                        console.log(tag);
-                        el.innerText = tag.tags.title;
-                    }
-                });
-                
-                el.innerText = track;
+            // The audio PLAYER logic
+            var playToggle = document.querySelector('#playToggle');
+            playToggle.addEventListener('click', togglePlay);
 
-                el.track = track;
-                el.addEventListener('click', this.onTrackClicked, false);
-                selectedPlaylistDiv.appendChild(el);
-            }
-
-            onTrackClicked(event) {
-                console.log(event.target.track);
-                audio.src = event.target.track;
-                audio.play();
-                console.log("Track clicked");
-            }
-
-            // method to add tracks, can add track song or array of tracks
-            addSong(path) {
-                if (Array.isArray(path)) {
-                    this.tracks = this.tracks.concat(path);
+            function togglePlay() {
+                console.log("Play btn clicked!")
+                if (audio.paused) {
+                    audio.play();
+                    playToggle.classList = "";
+                    playToggle.classList.add('play');
                 }
-                else { 
-                    this.tracks.push(path);
+
+                else if (audio.played) {
+                    console.log("Audio played, so pause");
+                    audio.pause();
+                    playToggle.classList = "";
+                    playToggle.classList.add('pause');
                 }
             }
-            
-            // function to save the current playlist to local storage
-            saveToLS() {
-                localStorage.setItem(this.title, JSON.stringify(this));
-            }
-        }
 
-        // Drag and drop based on MDN example
-        function dropHandler(ev) {
-            ev.preventDefault();
-            console.log("File dropped");
-            if (ev.dataTransfer.items) {
-                // Use DataTransferItemList interface to access the file(s)
-                for (var i = 0; i < ev.dataTransfer.items.length; i++) {
-                    // If dropped items aren't files, reject them
-                    if (ev.dataTransfer.items[i].kind === 'file') {
-                        var file = ev.dataTransfer.items[i].getAsFile();
-                        f = URL.createObjectURL(file);
-                        console.log(f);
-                        audio.src = f;
-                        audio.play();
+            // The progress bar, inspired by https://codepen.io/mdf/pen/ZWbvBv
+            var timer;
+            var percent = 0;
+            audio.addEventListener("playing", function(_event) {
+                clearTimeout(timer); //aby to neskakalo jak u blbejch na dvorku
+                var duration = _event.target.duration;
+                advance(duration, audio);
+            });
+            audio.addEventListener("pause", function(_event) {
+                clearTimeout(timer);
+            });
+            var advance = function(duration, element) {
+                var progress = document.querySelector(".progress");
+                increment = 10/duration
+                percent = Math.min(increment * element.currentTime * 10, 100);
+                progress.style.width = percent+'%'
+                startTimer(duration, element);
+            }
+            var startTimer = function(duration, element){ 
+                if(percent < 100) {
+                    timer = setTimeout(function (){advance(duration, element)}, 100);
+                }
+            }
+                
+            
+            // The visualizer
+            audio.addEventListener("playing", function(_event) {
+                if (selectedPlaylist.type == "immutable") return;
+                var context = new AudioContext();
+                var src = context.createMediaElementSource(audio);
+                var analyser = context.createAnalyser();
+                var canvas = document.querySelector(".visualizer");
+
+                var ctx = canvas.getContext("2d");
+                src.connect(analyser);
+                analyser.connect(context.destination);
+                analyser.fftSize = 256;
+                var bufferLength = analyser.frequencyBinCount;
+
+                var dataArray = new Uint8Array(bufferLength);
+
+                var WIDTH = canvas.width;
+                var HEIGHT = canvas.height;
+
+                var barWidth = (WIDTH / bufferLength) * 2.5;
+                var barHeight;
+                var x = 0;
+
+                function renderFrame() {
+                    requestAnimationFrame(renderFrame);
+
+                    x = 0;
+
+                    analyser.getByteFrequencyData(dataArray);
+
+                    ctx.fillStyle = "rgba(255, 255, 255, 1)";
+                    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+                    for (var i = 0; i < bufferLength; i++) {
+                        barHeight = dataArray[i];
                         
-                        console.log('... file[' + i + '].name = ' + file.name);
+                        var r = barHeight + (25 * (i/bufferLength));
+                        var g = 250 * (i/bufferLength);
+                        var b = 50;
+
+                        ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+                        ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+
+                        x += barWidth + 1;
                     }
                 }
-            } else {
-                // Use DataTransfer interface to access the file(s)
-                for (var i = 0; i < ev.dataTransfer.files.length; i++) {
-                console.log('... file[' + i + '].name = ' + ev.dataTransfer.files[i].name);
+                audio.play();
+                renderFrame();
+            });
+            
+    
+            // Drag and drop based on MDN example
+            function dropHandler(ev) {
+                ev.preventDefault();
+                console.log("File dropped");
+                if (ev.dataTransfer.items) {
+                    // Use DataTransferItemList interface to access the file(s)
+                    for (var i = 0; i < ev.dataTransfer.items.length; i++) {
+                        // If dropped items aren't files, reject them
+                        if (ev.dataTransfer.items[i].kind === 'file') {
+                            var file = ev.dataTransfer.items[i].getAsFile();
+                            if (file instanceof Blob) {
+                                console.log("File is a blob as all things should be")
+                            }
+                            f = URL.createObjectURL(file);
+                            console.log(f);
+                            if (selectedPlaylist.type == "immutable") return;
+                            selectedPlaylist.addSong(file);
+                            selectedPlaylist.displayPlaylist();
+                            console.log('... file[' + i + '].name = ' + file.name);
+                        }
+                    }
+                } else {
+                    // Use DataTransfer interface to access the file(s)
+                    for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+                    console.log('... file[' + i + '].name = ' + ev.dataTransfer.files[i].name);
+                    }
                 }
+    
+            }
+            function dragOverHandler(ev) {
+                console.log('File(s) in drop zone'); 
+    
+                // Prevent default behavior (Prevent file from being opened)
+                ev.preventDefault();
+            }
+    
+    
+            // some initial playlists for testing
+            const p1 = new Playlist('Immutable');
+            const song1 = new Song('https://playx.fun/MvWBZB:Vtx1rB', 'Nightcall',
+            'Kavinski', 'https://images-na.ssl-images-amazon.com/images/I/61SGDGFdkfL._SX355_.jpg')
+            const song2 = new Song('http://a.keepvid.ws/d/UbQgXeY_zi4/Caravan%20Palace%20-%20Lone%20Digger.mp3',
+            'Lone Digger', 'Caravan palace', 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Caravan_Palace_-_Robot_Face_album_cover.png/220px-Caravan_Palace_-_Robot_Face_album_cover.png');
+            const song3 = new Song('https://aoo.eooc.cc/bb62be9d2237ae25821b3fb10b81ce30/KDxJlW6cxRk',
+            'Ocean Drive', 'Duke Dumont', '');
+            const song4 = new Song('http://fredfred.net/skriker/download/music/Django_Reinhardt-Minor_swing.mp3',
+            'Minor swing', 'Django Reinhardt', '');
+            const song5 = new Song('https://eac.eooc.cc/68caddd0dae88a308d0c44006a402db6/uMK0prafzw0', 'Ugly boy',
+            'Die Antwoord', '');
+            const song6 = new Song('https://cco.eooc.cc/df3e6a33b88a89b478a4a77c05a8e78d/fGx6K90TmCI', "X Gon' Give It To Ya",
+            'DMX', '');
+            const song7 = new Song('https://aco.eooc.cc/832de5612785b6bbf6ac532e77e59d3e/uJ_1HMAGb4k', 'Riptide',
+            'Vance Joy', '');
+            
+            p1.addSong(song1);
+            p1.addSong(song2);
+            p1.addSong(song3);
+            p1.addSong(song4);
+            p1.addSong(song5);
+            p1.addSong(song6);
+            p1.addSong(song7);
+            playlists.push(p1);
+
+            const p2 = new CustomPlaylist("Custom");
+            playlists.push(p2);
+
+    
+            function displayAvailablePlaylists() {
+    
+            }
+    
+            function initPlaylists() {
+                JSON.parse(localStorage.getItem('playlists'));
             }
 
-        }
-        function dragOverHandler(ev) {
-            console.log('File(s) in drop zone'); 
-
-            // Prevent default behavior (Prevent file from being opened)
-            ev.preventDefault();
-        }
-
-
-        // some initial playlists for testing
-        const p1 = new Playlist('Rock');
-        const p3 = new Playlist('Local')
-        p1.addSong(['https://playx.fun/MvWBZB:Vtx1rB',
-        'https://www.bensound.org/bensound-music/bensound-anewbeginning.mp3', 
-        'https://www.bensound.org/bensound-music/bensound-punky.mp3', 
-        'https://www.bensound.org/bensound-music/bensound-goinghigher.mp3', 
-        'https://www.bensound.org/bensound-music/bensound-beyondtheline.mp3', 
-        'https://www.bensound.org/bensound-music/bensound-rumble.mp3']);
-        p3.addSong(['local/minor.mp3', 'local/moskau.mp3']);
-        playlists.push(p1);
-        playlists.push(p3);
-
-        function displayAvailablePlaylists() {
-
-        }
-
-        function initPlaylists() {
-            JSON.parse(localStorage.getItem('playlists'));
-        }
-    </script>
+        </script>
+    </body>
 </html>
