@@ -17,6 +17,11 @@
                 <ul class="playlists">
 
                 </ul>
+                <div class="managePlaylists">
+                        <div class="addPlaylist">
+
+                            </div>
+                </div>
             </nav>
             <div class="right">
                 <div class="upper player">
@@ -29,40 +34,30 @@
                     <div id="playToggle" class="pause">
                     </div>
 
+                    <h4 class="currentSong"></h4>
+
                     <div class="visual">
                         <canvas class="visualizer"></canvas>
-                        <div class="progress">Progress</div>
-                    </div>
+                        <div class="progress">
 
-                    Player here
+                        </div>
+                    </div>
                 </div>
         
                 <div class="selectedPlaylist" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
-                    <div class="song">
-                        <img class="album" src='icons/album_placeholder.jpg'>
-                        <h6>Title long long long long long long long long </h6>
-                        <h6>Artist</h6>
-                    </div>
 
-                    <div class="song">
-                        Song
-                    </div>
-
-                    <div class="song">
-                        Song
-                    </div>
-
-                    <div class="song">
-                        Song
-                    </div>
-
-                    <div class="song">
-                        Song
-                    </div>
-                </div>
-              
+                </div>              
             </div>
         </main>
+        <div class="modalAdd">
+            <div class="modalAddContent">
+                <h5>Enter the title of the new playlist</h5>
+              
+                    <input type="text" id="pltitle" value="Custom"> <br>
+                    <button id="addPlBtn">Add</button>
+              
+            </div>
+        </div>
         <footer>
             Icons made by <a href="https://www.flaticon.com/authors/google" title="Google">Google</a> from <a href="https://www.flaticon.com/" 
                 title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
@@ -84,6 +79,26 @@
                 let leftMenu = document.querySelector('.left');
                 leftMenu.classList.toggle('toggled');
     
+            }
+
+            // Adding playlist - opening modal
+            var addPlaylistBtn = document.querySelector(".addPlaylist");
+            var addPlaylistModal = document.querySelector(".modalAdd");
+            addPlaylistBtn.addEventListener('click', onAddPlaylistClicked);
+            function onAddPlaylistClicked() {
+                console.log("Add playlist clicked");
+                addPlaylistModal.classList.add("visible");
+            }
+            // adding playlist - finalize user story in modal window
+            var btnAdd = document.querySelector("#addPlBtn");
+            var txtInput = document.querySelector('#pltitle');
+            btnAdd.addEventListener('click', addPlaylistFinal);
+            function addPlaylistFinal() {
+                console.log("Add button clicked");
+                let txt = txtInput.value;
+                const pl = new CustomPlaylist(txt);
+                playlists.push(pl);
+                addPlaylistModal.classList.remove("visible");
             }
 
             // The audio PLAYER logic
@@ -180,7 +195,6 @@
                 audio.play();
                 renderFrame();
             });
-            
     
             // Drag and drop based on MDN example
             function dropHandler(ev) {
@@ -244,18 +258,6 @@
             p1.addSong(song6);
             p1.addSong(song7);
             playlists.push(p1);
-
-            const p2 = new CustomPlaylist("Custom");
-            playlists.push(p2);
-
-    
-            function displayAvailablePlaylists() {
-    
-            }
-    
-            function initPlaylists() {
-                JSON.parse(localStorage.getItem('playlists'));
-            }
 
         </script>
     </body>

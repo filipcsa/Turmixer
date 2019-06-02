@@ -70,45 +70,27 @@ class Playlist {
 
     // displays the song and adds event listener to it
     displaySong(song) {
-        /*
-        let trackView = document.createElement('li');
-        
-        let url =  track;//"https://cors-anywhere.herokuapp.com/" + track;
-        /*
-        jsmediatags.read(url, {
-            onSuccess: function(tag) {
-                console.log(tag);
-                el.innerText = tag.tags.title;
-            }
-        });
-        
-       let blob = fetch(track).then(r => r.blob());
-        getMetadata(blob, trackView);
-        
-        console.log("Dispalying track " + track);
-        //trackView.innerText = tags;
-        trackView.track = track;
-        trackView.addEventListener('click', this.onTrackClicked, false);
-        selectedPlaylistDiv.appendChild(trackView);
-        */
        let songDiv = song.getSongDiv();
        console.log(songDiv);
        songDiv.songSrc = song.src;
        console.log(songDiv);
-       songDiv.addEventListener('click', this.onSongClicked.bind(null, event, song.src));
+       songDiv.addEventListener('click', this.onSongClicked.bind(null, event, song));
        selectedPlaylistDiv.appendChild(songDiv);
        
 
     }
 
     // plays the song, has to toggle the play button
-    onSongClicked(event, songSrc) {
-        audio.src = songSrc;
+    onSongClicked(event, song) {
+        audio.src = song.src;
         audio.play();
         playToggle.classList = "";
         playToggle.classList.add('play');
         console.log(playToggle);
-        console.log("Track clicked");
+        console.log("Track clicked"); 
+        let currS = document.querySelector(".currentSong");
+        currS.innerText = "";
+        currS.innerText = song.title;
     }
 
     // method to add tracks, can add track song or array of tracks
@@ -141,7 +123,8 @@ class CustomPlaylist extends Playlist {
      * but doesn't display the playlist immediately
     */
     loadSong(file) {
-        
+        console.log(`Called loadSong on ${this.title}`);
+        this.loadMetadata(file, this);
     }
 
     /** Adding song to selected playlist manually by Dn'D */
@@ -149,15 +132,41 @@ class CustomPlaylist extends Playlist {
         let song = new Song('','','','', data);
         musicmetadata(data, function(err, result) {
             if (err) throw err;
-            console.log(result);
+            if (result.picture.length > 0) {
+                var picture = result.picture[0];
+                var url = URL.createObjectURL(new Blob([picture.data],
+                     {'type': 'image/' + picture.format}));
+                song.imgsrc = url;     
+            }
             song.title = result.title;
             song.artist = result.artist;
             song.src = URL.createObjectURL(data);
             console.log(result.artist);
             selectedPlaylist.tracks.push(song);
             selectedPlaylist.displayPlaylist();
+
             // add to idb
             addPlaylist(selectedPlaylist);
+        });
+    }
+
+    /** Same, but different */
+    loadMetadata(data, pl) {
+        var currPlaylist = this;
+        let song = new Song('', '', '', '', data);
+        musicmetadata(data, function(err, result) {
+            if (err) throw err;
+            if (result.picture.length > 0) {
+                var picture = result.picture[0];
+                var url = URL.createObjectURL(new Blob([picture.data],
+                     {'type': 'image/' + picture.format}));
+                song.imgsrc = url;     
+            }
+            song.title = result.title;
+            song.artist = result.artist;
+            song.src = URL.createObjectURL(data);
+
+            pl.tracks.push(song);
         });
     }
 

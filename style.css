@@ -15,7 +15,8 @@ main {
     background-color: rgb(245, 245, 245);
     min-width: 15em;
     height: 100%;
-    display: block;
+    display: flex;
+    flex-direction: column;;
     z-index: 0;
     transition:margin 0.5s ease-out;
 }
@@ -56,6 +57,26 @@ main {
     background-color: rgb(212, 212, 212);
 }
 
+.left .managePlaylists {
+    margin-top: auto;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: row;
+}
+
+.left .addPlaylist {
+    background-image: url("icons/add.svg");
+    background-size: cover;
+    width: 3em;
+    height: 3em;
+}
+
+.left .addPlaylist:hover {
+    background-image: url("icons/add_h.svg");
+}
+
 .right {
     background-color: green;
     flex-grow: 1;
@@ -85,6 +106,10 @@ main {
 
 .playlistToggle:hover {
     background-image: url("icons/playlist_h.svg");
+}
+
+#playToggle {
+    min-width: 4em;
 }
 
 #playToggle.pause {
@@ -117,12 +142,21 @@ main {
     background-size: cover;
 }
 
+.currentSong{
+    margin: 0;
+    padding: 0;
+    width: 8em;
+    min-width: 6em;
+    text-align: center;
+}
+
 .visual {
     display: flex;
     flex-direction: column;
     background-color: pink;
     flex-grow: 1;
     margin-left: 1em;
+    margin-right: 2em;
 }
 
 .visualizer {
@@ -189,4 +223,38 @@ footer {
     font-size: 0.7em;
     margin-top: 0.5em;
     text-align: center;
+}
+
+
+.modalAdd {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: 16px;
+    box-sizing: border-box;
+    z-index: 99;
+}
+
+.modalAdd.visible {
+    visibility: visible;
+}
+
+.modalAddContent {
+    margin: auto;
+    padding: 16px;
+    width: 400px;
+    max-width: 800px;
+    min-height: 300px;
+    border-radius: 10px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }

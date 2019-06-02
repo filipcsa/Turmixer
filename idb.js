@@ -21,6 +21,7 @@ function openDb() {
         db = this.result;
         console.log("openDb DONE");
         // test getPlaylistSongAndDisplayInCustomPlaylist();
+        loadAllPlaylists();
     };
     req.onerror = function (evt) {
         console.log("F*CK THIS SH*T IM OUT");
@@ -71,6 +72,24 @@ function addPlaylist(playlist) {
     }
     req.onerror = function() {
         console.log("Task of adding playlist to db failed successfuly");
+    }
+}
+
+function loadAllPlaylists() {
+    var store = getObjectStore(DB_STORE_NAME, 'readwrite');
+    var req = store.getAll();
+    req.onsuccess = function(evt) {
+        var retrievedData = evt.target.result;
+        console.log("Retrieved: ");
+        retrievedData.forEach(playlist => 
+            {
+                var pl = new CustomPlaylist(playlist.title);
+                playlist.files.forEach(file => {
+                    pl.loadSong(file);
+                })
+                playlists.push(pl);
+            });
+        
     }
 }
 
