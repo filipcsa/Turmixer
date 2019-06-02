@@ -1,4 +1,5 @@
-#Turmixer
+<h1>Turmixer</h1>
+
 Music player project for the Client side apps in JS course at CTU
 
 ![sample2](https://user-images.githubusercontent.com/46780723/58767173-e58fda80-8587-11e9-8563-df88e0a8e0f0.PNG)
@@ -24,6 +25,8 @@ K rozpoznávání tagů jsem využil knihovnu musicmetadata (https://github.com/
     * uvedeno zde
 * Validní použití HTML
    * Jop
+* Podpora browserů
+   * Testováno v Chrome a Firefox
 * Správné použití značek
    * Asi ano
 * Grafika SVG / Canvas
