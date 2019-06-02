@@ -22,4 +22,40 @@ K rozpoznávání tagů jsem využil knihovnu musicmetadata (https://github.com/
 ## Splněné body dle hodnocení
 * Cíl projektu, popis ...
     * uvedeno zde
+* Validní použití HTML
+   * Jop
+* Správné použití značek
+   * Asi ano
+* Grafika SVG / Canvas
+   * Obojí se objeví
+* Média
+   * je to hudební přehrávač ...
+* Formulářové prvky
+   * validace a placeholder
+* Offline aplikace
+   * ??? až na immutable playlist není připojení potřeba
+* Pokročilé selektory
+   * složitý je relativní, ale asi ano
+* Vendor prefixy
+   * Jop u indexeddb podle MDN
+* CSS transformace
+   * Nop
+* CSS transition
+   * Jop, schování sekce s playlisty
+* Media queries
+   * Jop, sekce s playlisty se schová automagicky
+* OOP přístup
+   * třídy pro playlisty a songy, i dědičnost
+* JS framework
+   * Nop
+* Pokročilé JS API   
+   * S indexeddb jsem dost bojoval, tak je to asi pokročilé. Taky drag n' drop.
+* Funkční historie
+   * Nenene
+* Ovládání médií
+   * Jojojo
+* Offline aplikace
+   * Asi ne?
+* JS práce se SVG
+   * Jen jako ikonky, takže spíše ne. Vizualizace je pře canvas.
     
